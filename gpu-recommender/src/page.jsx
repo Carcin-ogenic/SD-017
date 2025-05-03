@@ -1,18 +1,20 @@
 import React, { useState } from "react";
-import { Card } from "antd";
-import { Select, Slider, Button } from "antd";
-import "antd/dist/reset.css";
+import { Card, Select, Slider, Button } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import "./App.css";
 
 const { Option } = Select;
 
+const defaultFormData = {
+  os: "windows",
+  region: "ap-south-mum-1",
+  price: [0, 10000],
+  cpus: [1, 208],
+  ram: [1, 2000],
+};
+
 export default function GPUForm() {
-  const [formData, setFormData] = useState({
-    os: "windows",
-    region: undefined,
-    price: [0, 10000],
-    cpus: [1, 208],
-    ram: [1, 2000],
-  });
+  const [formData, setFormData] = useState(defaultFormData);
 
   const handleSliderChange = (field) => (value) => {
     setFormData({ ...formData, [field]: value });
@@ -38,77 +40,115 @@ export default function GPUForm() {
     console.log("Form submission payload:", payload);
   };
 
+  const handleReset = () => {
+    setFormData(defaultFormData);
+  };
+
+  const formatPrice = (value) => `$${value.toLocaleString()}`;
+  const formatCores = (value) => `${value} Cores`;
+  const formatRAM = (value) => `${value} GB`;
+
   return (
-    <div style={{ minHeight: "100vh", background: "#f0f2f5", display: "flex", justifyContent: "center", alignItems: "center", padding: 24 }}>
-      <Card title="GPU Recommendation Form" style={{ width: "100%", maxWidth: 800 }}>
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 16 }}>
-            <label>Operating System</label>
-            <Select
-              style={{ width: "100%" }}
-              value={formData.os}
-              onChange={handleSelectChange("os")}
-            >
-              <Option value="windows">Windows</Option>
-              <Option value="linux">Linux</Option>
-            </Select>
-          </div>
+    <>
+      <header className="gpu-header">
+        <SearchOutlined style={{ fontSize: "24px", marginRight: "12px" }} />
+        FindMyGPU
+      </header>
 
-          <div style={{ marginBottom: 16 }}>
-            <label>Region (Required)</label>
-            <Select
-              style={{ width: "100%" }}
-              placeholder="Select region"
-              value={formData.region}
-              onChange={handleSelectChange("region")}
-              required
-            >
-              <Option value="us-east-at-1">us-east-at-1</Option>
-              <Option value="ap-south-mum-1">ap-south-mum-1</Option>
-              <Option value="ap-south-del-1">ap-south-del-1</Option>
-              <Option value="ap-south-noi-1">ap-south-noi-1</Option>
-            </Select>
-          </div>
+      <div className="gpu-container">
+        <Card className="gpu-card">
+          <form onSubmit={handleSubmit}>
+            <div className="gpu-form-item">
+              <label className="gpu-label">Operating System</label>
+              <Select
+                className="gpu-select"
+                value={formData.os}
+                onChange={handleSelectChange("os")}
+              >
+                <Option value="windows">Windows</Option>
+                <Option value="linux">Linux</Option>
+              </Select>
+            </div>
 
-          <div style={{ marginBottom: 16 }}>
-            <label>Price Range: ${formData.price[0]} - ${formData.price[1]}</label>
-            <Slider
-              range
-              min={0}
-              max={10000}
-              step={100}
-              value={formData.price}
-              onChange={handleSliderChange("price")}
-            />
-          </div>
+            <div className="gpu-form-item">
+              <label className="gpu-label">
+                Region<span className="gpu-required">*</span>
+              </label>
+              <Select
+                className="gpu-select"
+                value={formData.region}
+                onChange={handleSelectChange("region")}
+                required
+              >
+                <Option value="ap-south-mum-1">Asia Pacific South (Mumbai)</Option>
+                <Option value="us-east-at-1">US East (at-1)</Option>
+                <Option value="ap-south-del-1">Asia Pacific South (Delhi)</Option>
+                <Option value="ap-south-noi-1">Asia Pacific South (Noida)</Option>
+              </Select>
+            </div>
 
-          <div style={{ marginBottom: 16 }}>
-            <label>CPU Cores: {formData.cpus[0]} - {formData.cpus[1]}</label>
-            <Slider
-              range
-              min={1}
-              max={208}
-              step={1}
-              value={formData.cpus}
-              onChange={handleSliderChange("cpus")}
-            />
-          </div>
+            <div className="gpu-form-item">
+              <label className="gpu-label">Price Range</label>
+              <Slider
+                className="gpu-slider"
+                range
+                min={0}
+                max={10000}
+                step={100}
+                value={formData.price}
+                onChange={handleSliderChange("price")}
+                tipFormatter={formatPrice}
+              />
+              <div className="gpu-value-display">
+                {formatPrice(formData.price[0])} - {formatPrice(formData.price[1])}
+              </div>
+            </div>
 
-          <div style={{ marginBottom: 16 }}>
-            <label>RAM Size (GB): {formData.ram[0]} - {formData.ram[1]}</label>
-            <Slider
-              range
-              min={1}
-              max={2000}
-              step={10}
-              value={formData.ram}
-              onChange={handleSliderChange("ram")}
-            />
-          </div>
+            <div className="gpu-form-item">
+              <label className="gpu-label">CPU Cores</label>
+              <Slider
+                className="gpu-slider"
+                range
+                min={1}
+                max={208}
+                step={1}
+                value={formData.cpus}
+                onChange={handleSliderChange("cpus")}
+                tipFormatter={formatCores}
+              />
+              <div className="gpu-value-display">
+                {formatCores(formData.cpus[0])} - {formatCores(formData.cpus[1])}
+              </div>
+            </div>
 
-          <Button type="primary" htmlType="submit" block>Submit</Button>
-        </form>
-      </Card>
-    </div>
+            <div className="gpu-form-item">
+              <label className="gpu-label">RAM Size</label>
+              <Slider
+                className="gpu-slider"
+                range
+                min={1}
+                max={2000}
+                step={10}
+                value={formData.ram}
+                onChange={handleSliderChange("ram")}
+                tipFormatter={formatRAM}
+              />
+              <div className="gpu-value-display">
+                {formatRAM(formData.ram[0])} - {formatRAM(formData.ram[1])}
+              </div>
+            </div>
+
+            <div className="gpu-button-group">
+              <Button type="primary" htmlType="submit" className="gpu-submit">
+                Find Recommended GPUs
+              </Button>
+              <Button onClick={handleReset} className="gpu-reset">
+                Reset Form
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
+    </>
   );
 }
