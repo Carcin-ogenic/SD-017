@@ -19,6 +19,7 @@ const defaultFormData = {
 export default function GPUForm() {
   const [formData, setFormData] = useState(defaultFormData);
   const [recommendations, setRecommendations] = useState([]);
+  const [hasSearched, setHasSearched] = useState(false);
   const [desc, setDesc] = useState('')
 
   const handleSliderChange = (field) => (value) => {
@@ -63,6 +64,7 @@ export default function GPUForm() {
 
       const data = await response.json();
       setRecommendations(data.recommendations);
+      setHasSearched(true);
       // console.log("Recommendations:", data.recommendations);
     } catch (err) {
       console.error("Error fetching recommendations:", err);
@@ -97,7 +99,8 @@ export default function GPUForm() {
                 rows={4}
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
-                placeholder="e.g., Machine learning training, 3D rendering..."
+                // placeholder="e.g., Machine learning training, 3D rendering..."
+                placeholder="Mention your specifications..."
               />
             </div>
             <div className="gpu-form-item">
@@ -213,7 +216,7 @@ export default function GPUForm() {
         </div>
       )} */}
 
-      <GPURecommendations recommendations={recommendations} />
+      <GPURecommendations recommendations={recommendations} hasSearched={hasSearched}/>
     </>
   );
 }
