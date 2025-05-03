@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
 const bodyParser = require("body-parser");
+const { extractFiltersFromText } = require("./groqService.js");
 
 const app = express();
 const PORT = 3000;
@@ -14,7 +15,7 @@ app.get("/recommend", async (req, res) => {
 app.post("/recommend", async (req, res) => {
   console.log("REQ", req.body);
   try {
-    const {
+    let {
       region = "ap-south-mum-1",
       operatingSystem = "linux",
       minVcpus = 0,
@@ -23,7 +24,14 @@ app.post("/recommend", async (req, res) => {
       maxRam = Infinity,
       minbudget = 0,
       maxbudget = Infinity,
+      text,
     } = req.body;
+
+    if (text && text.trim().length > 0) {
+      let nlpFilters = await extractFiltersFromText(text);
+      console.log(nlpFilters);
+      ({ region, operatingSystem, minVcpus, maxVcpus, minRam, maxRam, minbudget, maxbudget } = nlpFilters);
+    }
 
     // Example: https://customer.acecloudhosting.com/api/v1/pricing?is_gpu=true&resource=instances&region=ap-south-mum-1
     const apiUrl = `${process.env.ACECLOUD_API_URL}` + `?is_gpu=true` + `&resource=instances` + `&region=${region}`;
@@ -37,10 +45,10 @@ app.post("/recommend", async (req, res) => {
       const withinVcpus = inst.vcpus >= minVcpus && inst.vcpus <= maxVcpus;
       const withinRam = inst.ram >= minRam && inst.ram <= maxRam;
 
-      let priceInINR = inst.price_per_month;
+      let priceInINR = inst.price_per_hour;
       const currency = (inst.currency || "INR").toUpperCase();
       if (currency === "USD") {
-        priceInINR = inst.price_per_month * process.env.USD_TO_INR;
+        priceInINR = inst.price_per_hour * process.env.USD_TO_INR;
       }
 
       const withinPrice = priceInINR >= minbudget && priceInINR <= maxbudget;
