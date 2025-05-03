@@ -12,18 +12,40 @@ app.get("/recommend", async (req, res) => {
   res.send("Hello GPU's");
 });
 app.post("/recommend", async (req, res) => {
+  console.log("REQ", req.body);
   try {
-    const { region = "mumbai", minVcpus = 0, minRam = 0, maxHourlyBudget = Infinity } = req.body;
+    const {
+      region = "ap-south-mum-1",
+      operatingSystem = "linux",
+      minVcpus = 0,
+      maxVcpus = Infinity,
+      minRam = 0,
+      maxRam = Infinity,
+      minbudget = 0,
+      maxbudget = Infinity,
+    } = req.body;
 
     // Example: https://customer.acecloudhosting.com/api/v1/pricing?is_gpu=true&resource=instances&region=ap-south-mum-1
-    const apiUrl = `${process.env.ACECLOUD_API_URL}?is_gpu=true&resource=instances&region=${region}`;
+    const apiUrl = `${process.env.ACECLOUD_API_URL}` + `?is_gpu=true` + `&resource=instances` + `&region=${region}`;
 
+    console.log("api", apiUrl);
     const { data } = await axios.get(apiUrl);
     const instances = data.data || [];
 
-    const recommendations = instances.filter(
-      (inst) => inst.vcpus >= minVcpus && inst.ram >= minRam && inst.price_per_hour <= maxHourlyBudget
-    );
+    const recommendations = instances.filter((inst) => {
+      if ((inst.operating_system || "").toLowerCase() !== operatingSystem.toLowerCase()) return false;
+      const withinVcpus = inst.vcpus >= minVcpus && inst.vcpus <= maxVcpus;
+      const withinRam = inst.ram >= minRam && inst.ram <= maxRam;
+
+      let priceInINR = inst.price_per_month;
+      const currency = (inst.currency || "INR").toUpperCase();
+      if (currency === "USD") {
+        priceInINR = inst.price_per_month * process.env.USD_TO_INR;
+      }
+
+      const withinPrice = priceInINR >= minbudget && priceInINR <= maxbudget;
+      return withinVcpus && withinRam && withinPrice;
+    });
 
     return res.json({ recommendations });
   } catch (err) {
