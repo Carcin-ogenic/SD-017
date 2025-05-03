@@ -1,11 +1,14 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const axios = require("axios");
 const bodyParser = require("body-parser");
 const { extractFiltersFromText } = require("./groqService.js");
 
 const app = express();
 const PORT = 3000;
+
+app.use(cors());
 
 app.use(bodyParser.json());
 
