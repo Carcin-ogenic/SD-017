@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Card, Select, Slider, Button } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import "./App.css";
+import gpuBg from './assets/gpuBg.jpg'
+import GPURecommendations from "./recCard.jsx";
 
 const { Option } = Select;
 
@@ -81,10 +83,11 @@ export default function GPUForm() {
     <>
       <header className="gpu-header">
         <SearchOutlined style={{ fontSize: "24px", marginRight: "12px" }} />
-        FindMyGPU
+        SpecChoice
       </header>
 
       <div className="gpu-container">
+        <img src={gpuBg} className="absolute w-full top-0" alt="" />
         <Card className="gpu-card">
           <form onSubmit={handleSubmit}>
             <div className="gpu-form-item">
@@ -185,7 +188,7 @@ export default function GPUForm() {
         </Card>
       </div>
 
-      {recommendations.length > 0 && (
+      {/* {recommendations.length > 0 && (
         <div className="gpu-results">
           <h2 className="gpu-results-title">Recommended GPU Instances</h2>
           {recommendations.map((gpu, index) => (
@@ -208,7 +211,9 @@ export default function GPUForm() {
             </Card>
           ))}
         </div>
-      )}
+      )} */}
+
+      <GPURecommendations recommendations={recommendations} />
     </>
   );
 }
