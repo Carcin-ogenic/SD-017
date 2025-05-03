@@ -4,7 +4,7 @@ const Groq = require("groq-sdk");
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 async function extractFiltersFromText(userText) {
-  console.log("Extracting filters from text:", userText);
+  //   console.log("Extracting filters from text:", userText);
 
   const systemPrompt =
   `You are an assistant that extracts GPU recommendation filters from short user-provided use-case descriptions. ` +
@@ -58,7 +58,7 @@ async function extractFiltersFromText(userText) {
   });
 
   let jsonText = completion.choices[0]?.message?.content || "{}";
-  console.log("Raw JSON from model:", jsonText);
+  //   console.log("Raw JSON from model:", jsonText);
 
   jsonText = jsonText
     .trim()

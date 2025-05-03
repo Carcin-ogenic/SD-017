@@ -61,7 +61,7 @@ export default function GPUForm() {
 
       const data = await response.json();
       setRecommendations(data.recommendations);
-      console.log("Recommendations:", data.recommendations);
+      // console.log("Recommendations:", data.recommendations);
     } catch (err) {
       console.error("Error fetching recommendations:", err);
       alert("Something went wrong while fetching recommendations.");
@@ -99,11 +99,7 @@ export default function GPUForm() {
             </div>
             <div className="gpu-form-item">
               <label className="gpu-label">Operating System</label>
-              <Select
-                className="gpu-select"
-                value={formData.os}
-                onChange={handleSelectChange("os")}
-              >
+              <Select className="gpu-select" value={formData.os} onChange={handleSelectChange("os")}>
                 <Option value="windows">Windows</Option>
                 <Option value="linux">Linux</Option>
               </Select>
@@ -193,17 +189,22 @@ export default function GPUForm() {
         <div className="gpu-results">
           <h2 className="gpu-results-title">Recommended GPU Instances</h2>
           {recommendations.map((gpu, index) => (
-            <Card
-              key={index}
-              title={gpu.resource_name}
-              className="gpu-recommendation-card"
-              style={{ margin: "16px" }}
-            >
-              <p><strong>OS:</strong> {gpu.operating_system}</p>
-              <p><strong>vCPUs:</strong> {gpu.vcpus}</p>
-              <p><strong>RAM:</strong> {gpu.ram} GB</p>
-              <p><strong>Price per Month:</strong> ₹{gpu.price_per_month.toLocaleString()}</p>
-              <p><strong>GPU:</strong> {gpu.gpu_description}</p>
+            <Card key={index} title={gpu.resource_name} className="gpu-recommendation-card" style={{ margin: "16px" }}>
+              <p>
+                <strong>OS:</strong> {gpu.operating_system}
+              </p>
+              <p>
+                <strong>vCPUs:</strong> {gpu.vcpus}
+              </p>
+              <p>
+                <strong>RAM:</strong> {gpu.ram} GB
+              </p>
+              <p>
+                <strong>Price per Month:</strong> ₹{gpu.price_per_month.toLocaleString()}
+              </p>
+              <p>
+                <strong>GPU:</strong> {gpu.gpu_description}
+              </p>
             </Card>
           ))}
         </div>

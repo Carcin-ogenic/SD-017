@@ -16,7 +16,7 @@ app.get("/recommend", async (req, res) => {
   res.send("Hello GPU's");
 });
 app.post("/recommend", async (req, res) => {
-  console.log("REQ", req.body);
+  //   console.log("REQ", req.body);
   try {
     let {
       region = "ap-south-mum-1",
@@ -32,14 +32,14 @@ app.post("/recommend", async (req, res) => {
 
     if (text && text.trim().length > 0) {
       let nlpFilters = await extractFiltersFromText(text);
-      console.log(nlpFilters);
+      //   console.log(nlpFilters);
       ({ region, operatingSystem, minVcpus, maxVcpus, minRam, maxRam, minbudget, maxbudget } = nlpFilters);
     }
 
     // Example: https://customer.acecloudhosting.com/api/v1/pricing?is_gpu=true&resource=instances&region=ap-south-mum-1
     const apiUrl = `${process.env.ACECLOUD_API_URL}` + `?is_gpu=true` + `&resource=instances` + `&region=${region}`;
 
-    console.log("api", apiUrl);
+    // console.log("api", apiUrl);
     const { data } = await axios.get(apiUrl);
     const instances = data.data || [];
 
