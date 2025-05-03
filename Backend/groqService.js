@@ -7,14 +7,44 @@ async function extractFiltersFromText(userText) {
   console.log("Extracting filters from text:", userText);
 
   const systemPrompt =
-    `You are an assistant that extracts GPU recommendation filters from user queries. ` +
-    `Allowed regions are one of: us-east-at-1, ap-south-mum-1, ap-south-del-1, ap-south-noi-1. ` +
-    `Given an input text, output a JSON object with keys: ` +
-    `region (string), operatingSystem (string), minVcpus (integer), maxVcpus (integer), ` +
-    `minRam (integer), maxRam (integer), minbudget (number), maxbudget (number). ` +
-    `If the user does not specify a value for any key, estimate a reasonable default: ` +
-    `region="ap-south-mum-1", operatingSystem="linux", ` +
-    `minVcpus=1, maxVcpus=32, minRam=4, maxRam=128, minbudget=1000, maxbudget=50000.`;
+  `You are an assistant that extracts GPU recommendation filters from short user-provided use-case descriptions. ` +
+  `Your output must be a JSON object with exactly these keys (and types):\n` +
+  `  • region (string): one of [us-east-at-1, ap-south-mum-1, ap-south-del-1, ap-south-noi-1]\n` +
+  `  • operatingSystem (string): “linux” or “windows”\n` +
+  `  • minVcpus (integer), maxVcpus (integer)\n` +
+  `  • minRam (integer, GB), maxRam (integer, GB)\n` +
+  `  • minbudget (number, INR), maxbudget (number, INR)\n\n` +
+  `**GLOBAL HARD CAPS (never exceed):**\n` +
+  `  maxVcpus ≤ 512,\n` +
+  `  maxRam ≤ 2000 GB,\n` +
+  `  maxbudget ≤ 1000 INR\n\n` +
+  `RULES FOR INFERENCE:\n` +
+  `1. **Region & OS:**\n` +
+  `   • If user mentions a region, use it; otherwise default to "ap-south-mum-1".\n` +
+  `   • If user specifies “Windows” or “Linux,” honor it; otherwise default to "linux".\n\n` +
+  `2. **Use-Case Tiers:** Detect keywords for “low-end,” “mid-range,” or “high-end”:\n` +
+  `   a) **Low-End** (e.g. “basic,” “entry-level,” “mobile dev”):\n` +
+  `      • maxVcpus ≤ 16, maxRam ≤ 32 GB, maxbudget ≤ 300\n` +
+  `      • minVcpus = 2–4, minRam = 4–8, minbudget = 50–150\n` +
+  `   b) **Mid-Range** (e.g. “video editing,” “modern games,” “small ML”):\n` +
+  `      • maxVcpus ≤ 64, maxRam ≤ 128 GB, maxbudget ≤ 800\n` +
+  `      • minVcpus = 4–8, minRam = 16–32, minbudget = 150–300\n` +
+  `   c) **High-End** (e.g. “high-end gaming,” “4K/8K video,” “large LLM training”):\n` +
+  `      • maxVcpus ≤ 512, maxRam ≤ 2000 GB, maxbudget ≤ 1000\n` +
+  `      • minVcpus = 8–16, minRam = 64–128, minbudget = 300–1000\n\n` +
+  `3. **Special Cases:**\n` +
+  `   • “training large models”: push toward high-end specs within caps.\n` +
+  `   • “really high-end gaming”: ensure maxRam ≥ 256 GB (but ≤ 2000).\n\n` +
+  `4. **Defaults as Last Resort:** If no clues, fall back to:\n` +
+  `   region="ap-south-mum-1", operatingSystem="linux", ` +
+  `minVcpus=4, maxVcpus=512, minRam=4, maxRam=2000, ` +
+  `minbudget=50, maxbudget=1000.\n\n` +
+  `**IMPORTANT:** Tighten ranges to the narrowest band that covers the use case, ` +
+  `but never exceed the global hard caps.`; 
+
+
+
+
 
   const userPrompt =
     `Extract the filters from this text:\n"""${userText}"""\n` + `Respond with a valid JSON object and nothing else.`;
@@ -50,7 +80,7 @@ async function extractFiltersFromText(userText) {
       minRam: Number.isInteger(params.minRam) && params.minRam > 4 ? params.minRam : 4,
       maxRam: Number.isInteger(params.maxRam) && params.maxRam >= 4 ? params.maxRam : 2000,
       minbudget: typeof params.minbudget === "number" && params.minbudget > 0 ? params.minbudget : 50,
-      maxbudget: typeof params.maxbudget === "number" && params.maxbudget >= 1000 ? params.maxbudget : 1000,
+      maxbudget: typeof params.maxbudget === "number" && params.maxbudget >= 50 ? params.maxbudget : 1000,
     };
   } catch (err) {
     console.error("Failed to parse JSON from GROQ:", jsonText, err);

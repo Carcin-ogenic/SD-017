@@ -6,6 +6,7 @@ import "./App.css";
 const { Option } = Select;
 
 const defaultFormData = {
+  text: '',
   os: "windows",
   region: undefined,
   price: [50, 1000],
@@ -16,6 +17,7 @@ const defaultFormData = {
 export default function GPUForm() {
   const [formData, setFormData] = useState(defaultFormData);
   const [recommendations, setRecommendations] = useState([]);
+  const [desc, setDesc] = useState('')
 
   const handleSliderChange = (field) => (value) => {
     setFormData({ ...formData, [field]: value });
@@ -35,6 +37,7 @@ export default function GPUForm() {
     }
 
     const payload = {
+      text : desc,
       operatingSystem: os,
       region,
       minbudget: price[0],
@@ -84,6 +87,16 @@ export default function GPUForm() {
       <div className="gpu-container">
         <Card className="gpu-card">
           <form onSubmit={handleSubmit}>
+            <div className="gpu-form-item">
+              <label className="gpu-label">Describe Your Use Case</label>
+              <textarea
+                className="gpu-textarea"
+                rows={4}
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                placeholder="e.g., Machine learning training, 3D rendering..."
+              />
+            </div>
             <div className="gpu-form-item">
               <label className="gpu-label">Operating System</label>
               <Select
