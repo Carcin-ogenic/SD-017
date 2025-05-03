@@ -48,9 +48,9 @@ async function extractFiltersFromText(userText) {
       minVcpus: Number.isInteger(params.minVcpus) && params.minVcpus > 0 ? params.minVcpus : 4,
       maxVcpus: Number.isInteger(params.maxVcpus) && params.maxVcpus >= 1 ? params.maxVcpus : 512,
       minRam: Number.isInteger(params.minRam) && params.minRam > 4 ? params.minRam : 4,
-      maxRam: Number.isInteger(params.maxRam) && params.maxRam >= 4 ? params.maxRam : 512,
+      maxRam: Number.isInteger(params.maxRam) && params.maxRam >= 4 ? params.maxRam : 2000,
       minbudget: typeof params.minbudget === "number" && params.minbudget > 0 ? params.minbudget : 50,
-      maxbudget: typeof params.maxbudget === "number" && params.maxbudget >= 1000 ? params.maxbudget : 500000,
+      maxbudget: typeof params.maxbudget === "number" && params.maxbudget >= 1000 ? params.maxbudget : 1000,
     };
   } catch (err) {
     console.error("Failed to parse JSON from GROQ:", jsonText, err);
